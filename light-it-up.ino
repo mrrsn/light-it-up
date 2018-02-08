@@ -16,27 +16,18 @@ bool _currLevel[] = { false, false, false, false, false, false, false, false, fa
 void setup() {
     randomSeed( analogRead(0) );
     CircuitPlayground.begin( _brightness );
-
-    if ( CircuitPlayground.leftButton() && CircuitPlayground.rightButton() ) _timeWindow = _skillWindow[2];
-    else if ( CircuitPlayground.leftButton() ) _timeWindow = _skillWindow[1];
-
-    delay(500);
     PlayMusic( _helloMelody, _helloMelodyLen );
-    delay(500);
+
+    while ( !CircuitPlayground.rightButton() ) {}
+    Countdown();
 }
 
 void loop() {
-    while ( !CircuitPlayground.rightButton() ) {}
-    Countdown();
-    
     int change = 0;
-    
     for ( int level = 0; level < _levels; level++ ) {
         int led = 0;
         while ( !IsFull( _currLevel ) ) {
-            if ( CircuitPlayground.slideSwitch() ) {
-                CircuitPlayground.playTone(  _currLevel[led] ? _onTune[led] : _offTune[led], (int)_timeWindow*0.8 , false /* i.e. don't block */ );
-            }
+            CircuitPlayground.playTone(  _currLevel[led] ? _onTune[led] : _offTune[led], (int)_timeWindow*0.8 , false /* i.e. don't block */ );
             CircuitPlayground.setPixelColor( led, _onColor );
             EffectLightingDifficulty( _currSkill );
 
@@ -135,9 +126,7 @@ void Countdown() {
     
     for ( int i = 0; i < 3; i++ ) {
         LightThemAll( waitWaitGo[i] );
-        if ( CircuitPlayground.slideSwitch() ) {
-            CircuitPlayground.playTone( _startTune[i], noteDuration[i], true /* i.e. block */ );
-        }
+        CircuitPlayground.playTone( _startTune[i], noteDuration[i], true /* i.e. block */ );
         delay(300);
     }
 
@@ -169,11 +158,8 @@ void EffectLightingDifficulty( int skill ) {
 }
 
 void PlayMusic( const int melody[], const int len ) {
-    if ( !CircuitPlayground.slideSwitch() ) return;
-    
     for ( int note = 0; note < len; note++ ) {
         CircuitPlayground.playTone( melody[note], 100, true /* i.e. block */ );
         delay(20);
     }
 }
-
