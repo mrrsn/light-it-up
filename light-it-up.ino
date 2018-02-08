@@ -7,6 +7,7 @@
 #include <Adafruit_CircuitPlayground.h>
 #include <Adafruit_Circuit_Playground.h>
 #include "config.h"
+#include "lights.h"
 #include "melodies.h"
 
 int _currSkill = 0;
@@ -61,19 +62,20 @@ void loop() {
         InitCurrentLevel();
     }
 
-    if ( _currSkill == _maxSkill ) {
-        PlayMusic( _winMelody, _winMelodyLen );
-        GameWonLightShow();
-        _currSkill = 0;
-    }
-    else {
+    if ( _currSkill < _maxSkill ) {
         IncreaseDifficulty();
     }
+	else
+	{
+		PlayMusic( _winMelody, _winMelodyLen );
+		GameWonLightShow();
+		_currSkill = 0;
+	}
 }
 
 void IncreaseDifficulty() {
     int skill = ++_currSkill;
-    _timeWindow = _skillWindow[skill % 3];
+    _timeWindow = _skillWindow[skill];
 }
 
 void LoseOne() {
@@ -89,8 +91,8 @@ void LoseOne() {
 }
 
 void InitCurrentLevel() {
-    _offColor = RandomColor();
-    int i = _LEDs;
+    _offColor = RandomColor( random( _niceColorsCount ) );
+    int i = 10;
     while ( i --> 0 ) {
         _currLevel[i] = false;
         CircuitPlayground.setPixelColor( i, _offColor );
@@ -98,34 +100,28 @@ void InitCurrentLevel() {
     }
 }
 
-uint32_t RandomColor() {
-    uint32_t okRandomish[] = { 0xFF0000, 0x0000FF, 0x77FFFF, 0xFF3456, 0x5555FF, 0xFF7700, 0xB0BFFF };
-    return okRandomish[random(7)];
-}
-
 bool IsEmpty( bool arr[] ) {
-    int i = _LEDs;
+    int i = 10;
     while ( i --> 0 ) { if ( arr[i] ) return false; }
     return true;
 }
 
 bool IsFull( bool arr[] ) {
-    int i = _LEDs;
+    int i = 10;
     while ( i --> 0 ) { if ( !arr[i] ) return false; }
     return true;
 }
 
-void LightThemAll( uint32_t color ) {
-    int i = _LEDs;
+void LightThemAll( unsigned int color ) {
+    int i = 10;
     while ( i --> 0 ) CircuitPlayground.setPixelColor( i, color );
 }
 
 void Countdown() {
-    uint32_t waitWaitGo[] = { 0xFF0000, 0xFFFF00, 0x00FF00 };
     int noteDuration[] = { 700, 700, 1000 };
     
     for ( int i = 0; i < 3; i++ ) {
-        LightThemAll( waitWaitGo[i] );
+        LightThemAll( _waitWaitGo[i] );
         CircuitPlayground.playTone( _startTune[i], noteDuration[i], true /* i.e. block */ );
         delay(300);
     }
@@ -137,8 +133,8 @@ void Countdown() {
 void GameWonLightShow() {
     LightThemAll( 0x00FF00 );
     while ( true ) {
-        _offColor = RandomColor();
-        CircuitPlayground.setPixelColor( random(_LEDs), _offColor );
+        _offColor = RandomColor( random( _niceColorsCount ) );
+        CircuitPlayground.setPixelColor( random( 10 ), _offColor );
         delay(100);
         if ( CircuitPlayground.rightButton() ) break;
     }
@@ -149,11 +145,11 @@ void EffectLightingDifficulty( int skill ) {
     
     if ( skill > 5 ) {
         // insane, color confuses more than helps, must play by sound alone
-        CircuitPlayground.setPixelColor( random(_LEDs), RandomColor() );
+        CircuitPlayground.setPixelColor( random( 10 ), RandomColor( random( _niceColorsCount ) ) );
     }
     else {
         // _offColor will be mildly confusing
-        _offColor = RandomColor();
+        _offColor = RandomColor( random( _niceColorsCount ) );
     }
 }
 
