@@ -91,8 +91,11 @@ void LoseOne() {
 
     _currLevel[p] = false;
     CircuitPlayground.setPixelColor( p, _offColor );
+
+    CircuitPlayground.redLED( true );
     PlayMusic( _oopsMelody, _oopsMelodyLen );
     delay(250);
+    CircuitPlayground.redLED( false );
 }
 
 void InitCurrentLevel() {
