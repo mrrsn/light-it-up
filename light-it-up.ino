@@ -10,6 +10,7 @@
 #include "lights.h"
 #include "melodies.h"
 
+int _done = 0; // hit the reset button to start over
 int _currSkill = 0;
 int _timeWindow = _skillWindow[0];
 bool _currLevel[] = { false, false, false, false, false, false, false, false, false, false };
@@ -19,11 +20,13 @@ void setup() {
     CircuitPlayground.begin( _brightness );
     PlayMusic( _helloMelody, _helloMelodyLen );
 
-    while ( !CircuitPlayground.rightButton() ) {}
+    while ( !CircuitPlayground.rightButton() && !CircuitPlayground.leftButton() ) {}
     Countdown();
 }
 
 void loop() {
+    if ( _done ) return;
+
     int change = 0;
     for ( int level = 0; level < _levels; level++ ) {
         int led = 0;
@@ -65,12 +68,12 @@ void loop() {
     if ( _currSkill < _maxSkill ) {
         IncreaseDifficulty();
     }
-	else
-	{
-		PlayMusic( _winMelody, _winMelodyLen );
-		GameWonLightShow();
-		_currSkill = 0;
-	}
+    else
+    {
+        InitGame();
+        PlayMusic( _winMelody, _winMelodyLen );
+        GameWonLightShow();
+    }
 }
 
 void IncreaseDifficulty() {
@@ -100,6 +103,11 @@ void InitCurrentLevel() {
     }
 }
 
+void InitGame() {
+    _currSkill = 0;
+    _timeWindow = _skillWindow[0];
+}
+
 bool IsEmpty( bool arr[] ) {
     int i = 10;
     while ( i --> 0 ) { if ( arr[i] ) return false; }
@@ -118,11 +126,9 @@ void LightThemAll( unsigned int color ) {
 }
 
 void Countdown() {
-    int noteDuration[] = { 700, 700, 1000 };
-    
     for ( int i = 0; i < 3; i++ ) {
         LightThemAll( _waitWaitGo[i] );
-        CircuitPlayground.playTone( _startTune[i], noteDuration[i], true /* i.e. block */ );
+        CircuitPlayground.playTone( _startTune[i], _startTuneDuration[i], true /* i.e. block */ );
         delay(300);
     }
 
@@ -136,20 +142,23 @@ void GameWonLightShow() {
         _offColor = RandomColor( random( _niceColorsCount ) );
         CircuitPlayground.setPixelColor( random( 10 ), _offColor );
         delay(100);
-        if ( CircuitPlayground.rightButton() ) break;
+        if ( CircuitPlayground.rightButton() || CircuitPlayground.leftButton() ) break;
     }
+
+    CircuitPlayground.clearPixels();
+    _done = 1;
 }
 
 void EffectLightingDifficulty( int skill ) {
-    if ( skill < 3 ) return;
-    
-    if ( skill > 5 ) {
-        // insane, color confuses more than helps, must play by sound alone
-        CircuitPlayground.setPixelColor( random( 10 ), RandomColor( random( _niceColorsCount ) ) );
-    }
-    else {
-        // _offColor will be mildly confusing
-        _offColor = RandomColor( random( _niceColorsCount ) );
+    switch ( skill % 3 ) {
+        case 2: // insane, color confuses more than helps, must play by sound alone
+            CircuitPlayground.setPixelColor( random( 10 ), RandomColor( random( _niceColorsCount ) ) );
+            break;
+        case 1: // _offColor will be mildly confusing
+            _offColor = RandomColor( random( _niceColorsCount ) );
+            break;
+        default:
+            break;
     }
 }
 
