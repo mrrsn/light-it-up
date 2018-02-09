@@ -20,7 +20,10 @@ void setup() {
     CircuitPlayground.begin( _brightness );
     PlayMusic( _helloMelody, _helloMelodyLen );
 
-    while ( !CircuitPlayground.rightButton() && !CircuitPlayground.leftButton() ) {}
+    _currSkill = JumpToSkill();
+    _timeWindow = _skillWindow[ _currSkill ];
+
+    while ( !CircuitPlayground.rightButton() ) {}
     Countdown();
 }
 
@@ -77,8 +80,7 @@ void loop() {
 }
 
 void IncreaseDifficulty() {
-    int skill = ++_currSkill;
-    _timeWindow = _skillWindow[skill];
+    _timeWindow = _skillWindow[ ++_currSkill ];
 }
 
 void LoseOne() {
@@ -136,8 +138,26 @@ void Countdown() {
     LightThemAll( _offColor );
 }
 
+int JumpToSkill() {
+    LightThemAll( RED );
+
+    int skill = 0;
+    CircuitPlayground.setPixelColor( skill, ELECTRIC_BLUE );
+
+    while ( !CircuitPlayground.rightButton() && skill < _maxSkill ) {
+        if ( CircuitPlayground.leftButton() ) {
+            CircuitPlayground.setPixelColor( ++skill, ELECTRIC_BLUE );
+            delay( 250 );
+        }
+    }
+
+    while ( !CircuitPlayground.rightButton() ) {}
+
+    return skill;
+}
+
 void GameWonLightShow() {
-    LightThemAll( 0x00FF00 );
+    LightThemAll( GREEN );
     while ( true ) {
         _offColor = RandomColor( random( _niceColorsCount ) );
         CircuitPlayground.setPixelColor( random( 10 ), _offColor );
