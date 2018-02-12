@@ -126,9 +126,21 @@ bool IsFull( bool arr[] ) {
     return true;
 }
 
-void LightThemAll( unsigned int color ) {
+void LightThemAll( const unsigned int color ) {
+    COLOR c;
+    SplitColor( color, c );
+    LightThemAll( c );
+}
+
+void LightThemAll( const COLOR& c ) {
     int i = 10;
-    while ( i --> 0 ) CircuitPlayground.setPixelColor( i, color );
+    while ( i --> 0 ) CircuitPlayground.setPixelColor( i, c.red, c.green, c.blue );
+}
+
+void SplitColor( const unsigned int color, COLOR &c ) {
+    c.red = (color >> 16) & 255;
+    c.green = (color >> 8) & 255;
+    c.blue = color & 255;
 }
 
 void Countdown() {
@@ -143,7 +155,7 @@ void Countdown() {
 }
 
 int JumpToSkill() {
-    LightThemAll( RED );
+    LightThemAll( red );
 
     int skill = 0;
     CircuitPlayground.setPixelColor( skill, ELECTRIC_BLUE );

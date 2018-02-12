@@ -11,7 +11,15 @@
 #define ELECTRIC_BLUE 0x7DF9FF
 #define BOB 0xB0BFFF
 
-const unsigned int _waitWaitGo[] = { RED, YELLOW, GREEN };
+struct COLOR {
+    int red, green, blue;
+};
+
+const COLOR red = { red: 255, green: 0, blue: 0 };
+const COLOR yellow = { red: 255, green: 255, blue: 0 };
+const COLOR green = { red: 0, green: 255, blue: 0 };
+
+const COLOR _waitWaitGo[] = { red, yellow, green };
 const unsigned int _nicePalette[] = { RED, BLUE, LIGHT_BLUE, CANDY_RED, ELECTRIC_BLUE, ORANGE, BOB };
 const short _niceColorsCount = 7;
 
