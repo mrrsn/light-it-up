@@ -36,7 +36,6 @@ void loop() {
         while ( !IsFull( _currLevel ) ) {
             CircuitPlayground.playTone(  _currLevel[led] ? _onTune[led] : _offTune[led], (int)_timeWindow*0.8 , false /* i.e. don't block */ );
             CircuitPlayground.setPixelColor( led, _onColor );
-            EffectLightingDifficulty( _currSkill );
 
             unsigned long previousMillis = millis();
             unsigned long currentMillis = millis();
@@ -52,6 +51,8 @@ void loop() {
                     LoseOne();
                 }
             }
+
+            EffectLightingDifficulty( _currSkill );
 
             if ( !_currLevel[led] ) {
                 CircuitPlayground.setPixelColor( led, _offColor );
