@@ -35,7 +35,7 @@ void loop() {
         int led = 0;
         while ( !IsFull( _currLevel ) ) {
             CircuitPlayground.playTone(  _currLevel[led] ? _onTune[led] : _offTune[led], (int)_timeWindow*0.8 , false /* i.e. don't block */ );
-            CircuitPlayground.setPixelColor( led, _onColor );
+            CircuitPlayground.setPixelColor( led, _onColor.red, _onColor.green, _onColor.blue );
 
             unsigned long previousMillis = millis();
             unsigned long currentMillis = millis();
@@ -55,7 +55,7 @@ void loop() {
             EffectLightingDifficulty( _currSkill );
 
             if ( !_currLevel[led] ) {
-                CircuitPlayground.setPixelColor( led, _offColor );
+                CircuitPlayground.setPixelColor( led, _offColor.red, _offColor.green, _offColor.blue );
             }
             
             if ( led == 0 ) change = 1;
@@ -91,7 +91,7 @@ void LoseOne() {
     while ( !_currLevel[p] ) { p = random(10); }
 
     _currLevel[p] = false;
-    CircuitPlayground.setPixelColor( p, _offColor );
+    CircuitPlayground.setPixelColor( p, _offColor.red, _offColor.green, _offColor.blue );
 
     CircuitPlayground.redLED( true );
     PlayMusic( _oopsMelody, _oopsMelodyLen );
@@ -100,11 +100,11 @@ void LoseOne() {
 }
 
 void InitCurrentLevel() {
-    _offColor = RandomColor( random( _niceColorsCount ) );
+    _offColor = RandomColor( random( _nicePaletteCount ) );
     int i = 10;
     while ( i --> 0 ) {
         _currLevel[i] = false;
-        CircuitPlayground.setPixelColor( i, _offColor );
+        CircuitPlayground.setPixelColor( i, _offColor.red, _offColor.green, _offColor.blue );
         delay(50);
     }
 }
@@ -126,21 +126,9 @@ bool IsFull( bool arr[] ) {
     return true;
 }
 
-void LightThemAll( const unsigned int color ) {
-    COLOR c;
-    SplitColor( color, c );
-    LightThemAll( c );
-}
-
 void LightThemAll( const COLOR& c ) {
     int i = 10;
     while ( i --> 0 ) CircuitPlayground.setPixelColor( i, c.red, c.green, c.blue );
-}
-
-void SplitColor( const unsigned int color, COLOR &c ) {
-    c.red = (color >> 16) & 255;
-    c.green = (color >> 8) & 255;
-    c.blue = color & 255;
 }
 
 void Countdown() {
@@ -158,11 +146,11 @@ int JumpToSkill() {
     LightThemAll( red );
 
     int skill = 0;
-    CircuitPlayground.setPixelColor( skill, ELECTRIC_BLUE );
+    CircuitPlayground.setPixelColor( skill, electricBlue.red, electricBlue.green, electricBlue.blue );
 
     while ( !CircuitPlayground.rightButton() && skill < _maxSkill ) {
         if ( CircuitPlayground.leftButton() ) {
-            CircuitPlayground.setPixelColor( ++skill, ELECTRIC_BLUE );
+            CircuitPlayground.setPixelColor( ++skill, electricBlue.red, electricBlue.green, electricBlue.blue );
             delay( 250 );
         }
     }
@@ -173,10 +161,10 @@ int JumpToSkill() {
 }
 
 void GameWonLightShow() {
-    LightThemAll( GREEN );
+    LightThemAll( green );
     while ( true ) {
-        _offColor = RandomColor( random( _niceColorsCount ) );
-        CircuitPlayground.setPixelColor( random( 10 ), _offColor );
+        _offColor = RandomColor( random( _nicePaletteCount ) );
+        CircuitPlayground.setPixelColor( random( 10 ), _offColor.red, _offColor.green, _offColor.blue );
         delay(100);
         if ( CircuitPlayground.rightButton() || CircuitPlayground.leftButton() ) break;
     }
@@ -186,12 +174,14 @@ void GameWonLightShow() {
 }
 
 void EffectLightingDifficulty( int skill ) {
+    COLOR randomColor = RandomColor( random( _nicePaletteCount ) );
+
     switch ( skill % 3 ) {
         case 2: // insane, color confuses more than helps, must play by sound alone
-            CircuitPlayground.setPixelColor( random( 10 ), RandomColor( random( _niceColorsCount ) ) );
+            CircuitPlayground.setPixelColor( random( 10 ), randomColor.red, randomColor.green, randomColor.blue );
             break;
         case 1: // _offColor will be mildly confusing
-            _offColor = RandomColor( random( _niceColorsCount ) );
+            _offColor = randomColor;
             break;
         default:
             break;
