@@ -13,7 +13,8 @@ const COLOR lightRed = { red: 255, green: 52, blue: 86 };
 const COLOR electricBlue = { red: 125, green: 249, blue: 255 };
 const COLOR bob = { red: 176, green: 191, blue: 255 };
 
-const COLOR _waitWaitGo[] = { red, yellow, green };
+const COLOR _readySetGo[] = { red, yellow, green };
+
 const COLOR _nicePalette[] = { red, blue, lightBlue, lightRed, electricBlue, orange, bob };
 const short _nicePaletteCount = 7;
 

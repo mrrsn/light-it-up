@@ -87,8 +87,8 @@ void IncreaseDifficulty() {
 void LoseOne() {
     if ( IsEmpty( _currLevel ) ) return;
     
-    int p = random(10);
-    while ( !_currLevel[p] ) { p = random(10); }
+    int p = random( _leds );
+    while ( !_currLevel[p] ) { p = random( _leds ); }
 
     _currLevel[p] = false;
     CircuitPlayground.setPixelColor( p, _offColor.red, _offColor.green, _offColor.blue );
@@ -101,7 +101,8 @@ void LoseOne() {
 
 void InitCurrentLevel() {
     _offColor = RandomColor( random( _nicePaletteCount ) );
-    int i = 10;
+
+    int i = _leds;
     while ( i --> 0 ) {
         _currLevel[i] = false;
         CircuitPlayground.setPixelColor( i, _offColor.red, _offColor.green, _offColor.blue );
@@ -115,25 +116,25 @@ void InitGame() {
 }
 
 bool IsEmpty( bool arr[] ) {
-    int i = 10;
+    int i = _leds;
     while ( i --> 0 ) { if ( arr[i] ) return false; }
     return true;
 }
 
 bool IsFull( bool arr[] ) {
-    int i = 10;
+    int i = _leds;
     while ( i --> 0 ) { if ( !arr[i] ) return false; }
     return true;
 }
 
 void LightThemAll( const COLOR& c ) {
-    int i = 10;
+    int i = _leds;
     while ( i --> 0 ) CircuitPlayground.setPixelColor( i, c.red, c.green, c.blue );
 }
 
 void Countdown() {
     for ( int i = 0; i < 3; i++ ) {
-        LightThemAll( _waitWaitGo[i] );
+        LightThemAll( _readySetGo[i] );
         CircuitPlayground.playTone( _startTune[i], _startTuneDuration[i], true /* i.e. block */ );
         delay(300);
     }
@@ -164,7 +165,7 @@ void GameWonLightShow() {
     LightThemAll( green );
     while ( true ) {
         _offColor = RandomColor( random( _nicePaletteCount ) );
-        CircuitPlayground.setPixelColor( random( 10 ), _offColor.red, _offColor.green, _offColor.blue );
+        CircuitPlayground.setPixelColor( random( _leds ), _offColor.red, _offColor.green, _offColor.blue );
         delay(100);
         if ( CircuitPlayground.rightButton() || CircuitPlayground.leftButton() ) break;
     }
@@ -178,7 +179,7 @@ void EffectLightingDifficulty( int skill ) {
 
     switch ( skill % 3 ) {
         case 2: // insane, color confuses more than helps, must play by sound alone
-            CircuitPlayground.setPixelColor( random( 10 ), randomColor.red, randomColor.green, randomColor.blue );
+            CircuitPlayground.setPixelColor( random( _leds ), randomColor.red, randomColor.green, randomColor.blue );
             break;
         case 1: // _offColor will be mildly confusing
             _offColor = randomColor;
