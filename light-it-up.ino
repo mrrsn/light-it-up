@@ -16,6 +16,7 @@ int _timeWindow = _skillWindow[0];
 bool _currLevel[] = { false, false, false, false, false, false, false, false, false, false };
 
 void setup() {
+    Serial.begin(9600);
     randomSeed( analogRead(0) );
     CircuitPlayground.begin( _brightness );
     PlayMusic( _helloMelody, _helloMelodyLen );
@@ -70,12 +71,14 @@ void PlayLevel() {
 
         while( fabs( currentMillis - previousMillis ) < _timeWindow ) {
             currentMillis = millis();
-            if ( CircuitPlayground.leftButton() && led >= 5 ||
-                    CircuitPlayground.rightButton() && led < 5 ) {
+            Serial.println(CircuitPlayground.readCap(1));
+            Serial.println(CircuitPlayground.readCap(12));
+            if ( LeftButton() && led >= 5 ||
+                 RightButton() && led < 5 ) {
                 _currLevel[led] = true;
             }
-            else if ( ( CircuitPlayground.leftButton() && led < 5 ) || // wow, such wrong button
-                        ( CircuitPlayground.rightButton() && led >= 5 ) ) {
+            else if ( LeftButton() && led < 5 ||
+                      RightButton() && led >= 5 ) {
                 LoseOne();
             }
         }
@@ -208,3 +211,7 @@ void PlayMusic( const int melody[], const int len ) {
         delay(20);
     }
 }
+
+bool LeftButton() { return CircuitPlayground.leftButton() || CircuitPlayground.readCap( _leftCapPad ) > _capThreshold; }
+bool RightButton() { return CircuitPlayground.rightButton() || CircuitPlayground.readCap( _rightCapPad ) > _capThreshold; }
+
