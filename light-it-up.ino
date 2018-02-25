@@ -12,6 +12,7 @@
 
 int _done = 0; // hit the reset button to start over
 int _currSkill = 0;
+int _speedUp = 0;
 int _timeWindow = _skillWindow[0];
 bool _currLevel[] = { false, false, false, false, false, false, false, false, false, false };
 
@@ -49,6 +50,8 @@ void PlayGame() {
 }
 
 void PlaySkill() {
+    _speedUp = _skillWindow[_currSkill] * _speedUpPct;
+
     for ( int level = 0; level < _levels; level++ ) {
         PlayLevel();
 
