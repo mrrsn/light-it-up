@@ -10,10 +10,8 @@
 #include "lights.h"
 #include "melodies.h"
 
-bool _currLevel[] = { false, false, false, false, false, false, false, false, false, false };
-
 void setup() {
-    Serial.begin(9600);
+    //Serial.begin(9600);
     randomSeed( analogRead(0) );
     CircuitPlayground.begin( _brightness );
     PlayMusic( _helloMelody, _helloMelodyLen );
@@ -41,10 +39,8 @@ void PlaySkill( int skill ) {
 
     for ( int level = 0; level < _levels; level++ ) {
         PlayLevel( skill, level, timeWindow );
-
-        timeWindow -= speedUp;
         PlayMusic( _levelUpMelody, _levelUpMelodyLen );
-        InitCurrentLevel();
+        timeWindow -= speedUp;
     }
 }
 
@@ -52,31 +48,31 @@ void PlayLevel( int skill, int level, int timeWindow ) {
     int led = 0;
     int change = 0;
     float partTime = 0.8f;
+    bool currLevel[] = { false, false, false, false, false, false, false, false, false, false };
 
-    while ( !IsFull( _currLevel ) ) {
-        CircuitPlayground.playTone(  _currLevel[led] ? _onTune[led] : _offTune[led], (int)( timeWindow * partTime ), false /* i.e. don't block */ );
+    while ( !IsFull( currLevel ) ) {
+        CircuitPlayground.playTone(  currLevel[led] ? _onTune[led] : _offTune[led], (int)( timeWindow * partTime ), false /* i.e. don't block */ );
         CircuitPlayground.setPixelColor( led, _onColor.red, _onColor.green, _onColor.blue );
+        EffectLightingDifficulty( skill );
 
         unsigned long previousMillis = millis();
         unsigned long currentMillis = millis();
 
         while( fabs( currentMillis - previousMillis ) < timeWindow ) {
             currentMillis = millis();
-            Serial.println(CircuitPlayground.readCap(1));
-            Serial.println(CircuitPlayground.readCap(12));
+            //Serial.println(CircuitPlayground.readCap(1));
+            //Serial.println(CircuitPlayground.readCap(12));
             if ( LeftButton() && led >= 5 ||
                  RightButton() && led < 5 ) {
-                _currLevel[led] = true;
+                currLevel[led] = true;
             }
             else if ( LeftButton() && led < 5 ||
                       RightButton() && led >= 5 ) {
-                LoseOne();
+                LoseOne( currLevel );
             }
         }
 
-        EffectLightingDifficulty( skill );
-
-        if ( !_currLevel[led] ) {
+        if ( !currLevel[led] ) {
             CircuitPlayground.setPixelColor( led, _offColor.red, _offColor.green, _offColor.blue );
         }
 
@@ -85,15 +81,17 @@ void PlayLevel( int skill, int level, int timeWindow ) {
 
         led += change;
     }
+
+    InitCurrentLevel( currLevel );
 }
 
-void LoseOne() {
-    if ( IsEmpty( _currLevel ) ) return;
+void LoseOne( bool currLevel[] ) {
+    if ( IsEmpty( currLevel ) ) return;
     
     int p = random( _leds );
-    while ( !_currLevel[p] ) { p = random( _leds ); }
+    while ( !currLevel[p] ) { p = random( _leds ); }
 
-    _currLevel[p] = false;
+    currLevel[p] = false;
     CircuitPlayground.setPixelColor( p, _offColor.red, _offColor.green, _offColor.blue );
 
     CircuitPlayground.redLED( true );
@@ -102,12 +100,12 @@ void LoseOne() {
     CircuitPlayground.redLED( false );
 }
 
-void InitCurrentLevel() {
+void InitCurrentLevel( bool currLevel[] ) {
     _offColor = RandomColor( random( _nicePaletteCount ) );
 
     int i = _leds;
     while ( i --> 0 ) {
-        _currLevel[i] = false;
+        currLevel[i] = false;
         CircuitPlayground.setPixelColor( i, _offColor.red, _offColor.green, _offColor.blue );
         delay(50);
     }
