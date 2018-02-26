@@ -10,10 +10,6 @@
 #include "lights.h"
 #include "melodies.h"
 
-int _done = 0; // hit the reset button to start over
-int _currSkill = 0;
-int _speedUp = 0;
-int _timeWindow = _skillWindow[0];
 bool _currLevel[] = { false, false, false, false, false, false, false, false, false, false };
 
 void setup() {
@@ -21,58 +17,50 @@ void setup() {
     randomSeed( analogRead(0) );
     CircuitPlayground.begin( _brightness );
     PlayMusic( _helloMelody, _helloMelodyLen );
-
-    _currSkill = JumpToSkill();
-    _timeWindow = _skillWindow[ _currSkill ];
-
-    while ( !CircuitPlayground.rightButton() ) {}
-    Countdown();
+    PlayGame();
+    PlayMusic( _winMelody, _winMelodyLen );
+    GameWonLightShow();
 }
 
 void loop() {
-    PlayGame();
 }
 
 void PlayGame() {
-    if ( _done ) return;
+    int skillJump = JumpToSkill();
+    while ( !CircuitPlayground.rightButton() ) {}
+    Countdown();
 
-    PlaySkill();
-
-    if ( _currSkill < _maxSkill ) {
-        IncreaseDifficulty();
-    }
-    else
-    {
-        InitGame();
-        PlayMusic( _winMelody, _winMelodyLen );
-        GameWonLightShow();
+    for ( int skill = skillJump; skill < _maxSkill; skill++ ) {
+        PlaySkill( skill );
     }
 }
 
-void PlaySkill() {
-    _speedUp = _skillWindow[_currSkill] * _speedUpPct;
+void PlaySkill( int skill ) {
+    int timeWindow = _skillWindow[skill];
+    int speedUp = (int)( timeWindow * _speedUpPct );
 
     for ( int level = 0; level < _levels; level++ ) {
-        PlayLevel();
+        PlayLevel( skill, level, timeWindow );
 
-        _timeWindow -= _speedUp;
+        timeWindow -= speedUp;
         PlayMusic( _levelUpMelody, _levelUpMelodyLen );
         InitCurrentLevel();
     }
 }
 
-void PlayLevel() {
+void PlayLevel( int skill, int level, int timeWindow ) {
     int led = 0;
     int change = 0;
+    float partTime = 0.8f;
 
     while ( !IsFull( _currLevel ) ) {
-        CircuitPlayground.playTone(  _currLevel[led] ? _onTune[led] : _offTune[led], (int)_timeWindow*0.8 , false /* i.e. don't block */ );
+        CircuitPlayground.playTone(  _currLevel[led] ? _onTune[led] : _offTune[led], (int)( timeWindow * partTime ), false /* i.e. don't block */ );
         CircuitPlayground.setPixelColor( led, _onColor.red, _onColor.green, _onColor.blue );
 
         unsigned long previousMillis = millis();
         unsigned long currentMillis = millis();
 
-        while( fabs( currentMillis - previousMillis ) < _timeWindow ) {
+        while( fabs( currentMillis - previousMillis ) < timeWindow ) {
             currentMillis = millis();
             Serial.println(CircuitPlayground.readCap(1));
             Serial.println(CircuitPlayground.readCap(12));
@@ -86,7 +74,7 @@ void PlayLevel() {
             }
         }
 
-        EffectLightingDifficulty( _currSkill );
+        EffectLightingDifficulty( skill );
 
         if ( !_currLevel[led] ) {
             CircuitPlayground.setPixelColor( led, _offColor.red, _offColor.green, _offColor.blue );
@@ -97,10 +85,6 @@ void PlayLevel() {
 
         led += change;
     }
-}
-
-void IncreaseDifficulty() {
-    _timeWindow = _skillWindow[ ++_currSkill ];
 }
 
 void LoseOne() {
@@ -127,11 +111,6 @@ void InitCurrentLevel() {
         CircuitPlayground.setPixelColor( i, _offColor.red, _offColor.green, _offColor.blue );
         delay(50);
     }
-}
-
-void InitGame() {
-    _currSkill = 0;
-    _timeWindow = _skillWindow[0];
 }
 
 bool IsEmpty( bool arr[] ) {
@@ -190,17 +169,14 @@ void GameWonLightShow() {
     }
 
     CircuitPlayground.clearPixels();
-    _done = 1;
 }
 
 void EffectLightingDifficulty( int skill ) {
     COLOR randomColor = RandomColor( random( _nicePaletteCount ) );
 
     switch ( skill % 3 ) {
-        case 2: // insane, color confuses more than helps, must play by sound alone
-            CircuitPlayground.setPixelColor( random( _leds ), randomColor.red, randomColor.green, randomColor.blue );
-            break;
-        case 1: // _offColor will be mildly confusing
+        case 2:
+        case 1:
             _offColor = randomColor;
             break;
         default:
