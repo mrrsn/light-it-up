@@ -3,6 +3,7 @@
 
 struct COLOR { uint8_t red, green, blue; };
 
+const COLOR white = { 255, 255, 255 };
 const COLOR red = { 255, 0, 0 };
 const COLOR orange = { 255, 128, 0 };
 const COLOR yellow = { 255, 255, 0 };
@@ -20,6 +21,7 @@ const COLOR _nicePalette[] = { red, blue, lightBlue, lightRed, electricBlue, ora
 const short _nicePaletteCount = 8;
 
 COLOR _offColor = blue;
+COLOR _midColor = white;
 COLOR _onColor = green;
 
 COLOR RandomColor( int rand ) { return _nicePalette[ rand % _nicePaletteCount ]; }
