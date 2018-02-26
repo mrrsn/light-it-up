@@ -11,7 +11,7 @@
 #include "melodies.h"
 
 void setup() {
-    //Serial.begin(9600);
+//    Serial.begin(9600);
     randomSeed( analogRead(0) );
     CircuitPlayground.begin( _brightness );
     PlayMusic( _helloMelody, _helloMelodyLen );
@@ -69,16 +69,16 @@ void PlayLevel( int skill, int level, int timeWindow ) {
 
         unsigned long previousMillis = millis();
         unsigned long currentMillis = millis();
+        bool gain = false;
 
         while( fabs( currentMillis - previousMillis ) < timeWindow ) {
-            //Serial.println(CircuitPlayground.readCap(1));
-            //Serial.println(CircuitPlayground.readCap(12));
             currentMillis = millis();
-            if ( ( LeftButton() && led >= 5 ) ||
-                 ( RightButton() && led < 5 ) ) {
+            if ( gain ) continue;
+
+            if ( ( LeftButton() && !RightButton() && led >= 5 ) ||
+                 ( RightButton() && !LeftButton() && led < 5 ) ) {
                 GainThisOne( led, currLevel, skill );
-                delay( timeWindow - fabs( currentMillis - previousMillis ) );
-                break;
+                gain = true;
             }
             else if ( ( LeftButton() && led < 5 ) ||
                       ( RightButton() && led >= 5 ) ) {
@@ -117,8 +117,8 @@ void LoseOne( int currLevel[] ) {
 }
 
 void GainThisOne( int pixel, int currLevel[], int skill ) {
-    if ( ( IsDifficult( skill ) && currLevel[pixel] < 2 ) ||
-         currLevel[pixel] < 1 )
+    if ( 0 == currLevel[pixel] ||
+         ( IsDifficult( skill ) && 1 == currLevel[pixel] ) )
     {
         currLevel[pixel]++;
     }
