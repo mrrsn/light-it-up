@@ -52,7 +52,18 @@ void PlayLevel( int skill, int level, int timeWindow ) {
     int currLevel[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     while ( !IsFull( currLevel, skill ) ) {
-        CircuitPlayground.playTone(  currLevel[led] ? _onTune[led] : _offTune[led], (int)( timeWindow * partTime ), false /* i.e. don't block */ );
+        switch ( currLevel[led] ) {
+            case 0:
+                CircuitPlayground.playTone( _offTune[led], (int) ( timeWindow * partTime ), false /* i.e. don't block */ );
+                break;
+            case 2:
+                CircuitPlayground.playTone( _highTune[led], (int) ( timeWindow * partTime ), false /* i.e. don't block */ );
+                break;
+            default:
+                CircuitPlayground.playTone( _onTune[led], (int) ( timeWindow * partTime ), false /* i.e. don't block */ );
+                break;
+        }
+
         CircuitPlayground.setPixelColor( led, _onColor.red, _onColor.green, _onColor.blue );
         ApplyLightingDifficulty( skill );
 
@@ -66,6 +77,8 @@ void PlayLevel( int skill, int level, int timeWindow ) {
             if ( ( LeftButton() && led >= 5 ) ||
                  ( RightButton() && led < 5 ) ) {
                 GainThisOne( led, currLevel, skill );
+                delay( timeWindow - fabs( currentMillis - previousMillis ) );
+                break;
             }
             else if ( ( LeftButton() && led < 5 ) ||
                       ( RightButton() && led >= 5 ) ) {
@@ -162,7 +175,7 @@ int JumpToSkill() {
     int skill = 0;
     CircuitPlayground.setPixelColor( skill, electricBlue.red, electricBlue.green, electricBlue.blue );
 
-    while ( !CircuitPlayground.rightButton() && skill < _maxSkill ) {
+    while ( !CircuitPlayground.rightButton() && skill < _maxSkill - 1 ) {
         if ( CircuitPlayground.leftButton() ) {
             CircuitPlayground.setPixelColor( ++skill, electricBlue.red, electricBlue.green, electricBlue.blue );
             delay( 250 );

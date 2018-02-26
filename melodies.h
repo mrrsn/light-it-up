@@ -20,5 +20,6 @@ const int _startTuneDuration[] = { 700, 700, 1000 };
 
 const int _offTune[] = { NOTE_C2, NOTE_G2, NOTE_D2, NOTE_G2, NOTE_E2, NOTE_G2, NOTE_F2, NOTE_G2, NOTE_E2, NOTE_G2 };
 const int _onTune[] = { NOTE_C3, NOTE_G3, NOTE_D3, NOTE_G3, NOTE_E3, NOTE_G3, NOTE_F3, NOTE_G3, NOTE_E3, NOTE_G3 };
+const int _highTune[] = { NOTE_C4, NOTE_G4, NOTE_D4, NOTE_G4, NOTE_E4, NOTE_G4, NOTE_F4, NOTE_G4, NOTE_E4, NOTE_G4 };
 
 #endif
